@@ -28,12 +28,12 @@ function(req, res) {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create', util.checkUser,
 function(req, res) {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 function(req, res) {
   Links.reset().fetch().then(function(links) {
     res.status(200).send(links.models);
@@ -43,7 +43,6 @@ function(req, res) {
 app.post('/links', 
 function(req, res) {
   var uri = req.body.url;
-
   if (!util.isValidUrl(uri)) {
     console.log('Not a valid url: ', uri);
     return res.sendStatus(404);
@@ -76,7 +75,53 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 
+app.post('/signup', function(req, res) {
+  var username = req.body.username;
+  var password = req.body.password;
+  new User({
+    username: username,
+    password: password
+  })
+  .save()
+  .then(function() {
+    res.redirect('/');
+  });
+});
 
+app.post('/login', util.checkUser, function(req, res) {
+  res.redirect('/');
+});
+
+app.post('/logout', util.checkUser, function(req, res) {
+  // code to log someone out?
+  res.redirect('/');
+});
+
+
+/*
+  User.where({username: username})
+  .fetch()
+  .then(function(user) {
+    return User.hashPassword(user);
+  })
+  .then(function(hash) {
+    return User.where({
+      username: username,
+      password: hash
+    })
+    .fetch();
+  })
+  .then(function(results) {
+    if (!results) {
+      res.redirect('/login');
+    } else {
+      res.redirect('/');
+    }
+  })
+  .catch(function(err) {
+    console.log(err);
+  });
+*/
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
