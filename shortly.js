@@ -2,7 +2,6 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
 var db = require('./app/config');
@@ -22,7 +21,6 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-app.use(cookieParser());
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -33,22 +31,31 @@ app.use(session({
 
 app.get('/', 
 function(req, res) {
-  res.render('index');
+  console.log(req.session);
+  res.render('index', {currentUser: req.session.authenticated, username: req.session.username});
 });
 
 app.get('/create', util.checkUser,
 function(req, res) {
-  res.render('index');
+  res.render('index', {currentUser: req.session.authenticated, username: req.session.username});
 });
 
-app.get('/links',
+app.get('/links', 
 function(req, res) {
-  Links.reset().fetch().then(function(links) {
+  Links.query('where', {username: req.body.username}).fetch({withRelated: ['users']}).then(function(links) {
     res.status(200).send(links.models);
   });
 });
 
-app.post('/links', 
+app.get('/login', function(req, res) {
+  res.render('login', {currentUser: req.session.authenticated, username: req.session.username});
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup', {currentUser: req.session.authenticated, username: req.session.username});
+});
+
+app.post('/links', util.checkUser,
 function(req, res) {
   var uri = req.body.url;
   if (!util.isValidUrl(uri)) {
@@ -93,16 +100,21 @@ app.post('/signup', function(req, res) {
   .save()
   .then(function() {
     req.session[req.body.username] = true;
+    req.session.username = req.body.username;
+    req.session.authenticated = true;
     res.redirect('/');
   });
 });
 
 app.post('/login', util.checkUser, function(req, res) {
+  req.session.authenticated = true;
+  req.session.username = req.body.username;
   res.redirect('/');
 });
 
-app.post('/logout', util.checkUser, function(req, res) {
-  // code to log someone out?
+app.get('/logout', function(req, res) {
+  delete req.session.username;
+  req.session.authenticated = false;
   delete req.session[req.body.username];
   res.redirect('/');
 });

@@ -33,6 +33,10 @@ h1 {
 
 .navigation .logout {
   float: right;
+  line-height: 20px;
+  padding: 10px;
+  display: block;
+  text-align: center;
 }
 
 .navigation li a , .logout {
@@ -42,6 +46,11 @@ h1 {
   padding: 10px;
   display: block;
   text-align: center;
+}
+
+ a.logoutlink{
+  padding-top: 0px;
+  /*padding-bottom: 5px;*/
 }
 
 .navigation li a:hover {
