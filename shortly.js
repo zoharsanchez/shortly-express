@@ -2,7 +2,8 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,6 +22,13 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(cookieParser());
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false
+}));
+
 
 
 app.get('/', 
@@ -84,6 +92,7 @@ app.post('/signup', function(req, res) {
   })
   .save()
   .then(function() {
+    req.session[req.body.username] = true;
     res.redirect('/');
   });
 });
@@ -94,6 +103,7 @@ app.post('/login', util.checkUser, function(req, res) {
 
 app.post('/logout', util.checkUser, function(req, res) {
   // code to log someone out?
+  delete req.session[req.body.username];
   res.redirect('/');
 });
 
@@ -150,3 +160,4 @@ app.get('/*', function(req, res) {
 
 console.log('Shortly is listening on 4568');
 app.listen(4568);
+// 

@@ -44,7 +44,7 @@ describe('', function() {
         //   type: 'DatabaseError',
         //   message: 'Failed to create test setup data'
         // };
-      });
+    });
 
     // delete user Phillip from db so it can be created later for the test
     db.knex('users')
@@ -56,7 +56,7 @@ describe('', function() {
         //   type: 'DatabaseError',
         //   message: 'Failed to create test setup data'
         // };
-      });
+    });
   });
 
   describe('Link creation:', function() {
